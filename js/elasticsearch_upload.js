@@ -186,7 +186,7 @@ $(document).ready(function(){
         var password = url_parts_obj.password;
         var domain_with_port = url_parts_obj.domain;
 
-        var url = scheme_with_slashes+domain_with_port+"/_bulk";
+        var url = scheme_with_slashes+domain_with_port+"/"+index_name+"/_bulk";
 
         Papa.parse(file_obj, {
                 header:true,
@@ -195,21 +195,22 @@ $(document).ready(function(){
                 skipEmptyLines:true,
                 chunk:function(results,parser){
                     var post_arr = [];
-                    console.log(results);
                     for(i=0;i<results.data.length;i++)
                     {
                         var conf_onj = { "index" : { "_index" : index_name, "_type" : doctype } };
-                        post_arr.push(conf_onj);
-                        post_arr.push(results.data[i]);
+                        post_arr.push(JSON.stringify(conf_onj));
+                        post_arr.push(JSON.stringify(results.data[i]));
                     }
                     
-                    
-                    console.log(post_arr);
                     $.ajax({
                         url:url,
-                        data:results,
+                        data:post_arr.join("\n"),
                         type : "POST",
-                        crossDomain : true
+                        crossDomain : true,
+                        dataType: "text",
+                        error: function(e) {
+                            console.log(e);
+                        },
                     });              
                 }
 
