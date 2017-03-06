@@ -5,14 +5,12 @@ $(document).ready(function(){
     });
     
     var rowCount = 0;           //global variable to be used further
-    file_obj="";         //global variable to be used further
+    var file_obj = "";         //global variable to be used further
 
     function handleFileSelect(evt){
         // var rowCount = 0;
         var file = evt.target.files[0];
         file_obj = file;
-        
-        
     }
 
     $("#csv-input").change(handleFileSelect);
@@ -179,15 +177,21 @@ $(document).ready(function(){
     $("#upload").on("click",function(event){
         var chunk_size = parseInt($("#chunk-size").val().trim());
         var posted_object_arr = [];
+        var delimiter=$("#delimiter").val().trim();
+        
         Papa.parse(file_obj, {
-            header:true,
-            delimeter: delimiter,
-            chunkSize:1024*chunk_size,
-            chunk:function(results,parser){
-                csv_header_arr=results.meta['fields'];
-                posted_object_arr.push(csv_header_arr);
-            }
-        });
-        console.log(posted_object_arr);
+                header:true,
+                delimeter: delimiter,
+                chunkSize:1024*chunk_size,
+                skipEmptyLines:true,
+                chunk:function(results,parser){
+                    console.log(results) ;               
+                }
+
+            });
+        
     });
+
+
+
 });
