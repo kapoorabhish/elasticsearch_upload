@@ -33,7 +33,6 @@ $(document).ready(function(){
         var password = url_parts[3];
         var domain = url_parts[4];
 
-        
 
         index_doctype_string = url_parts[5].trim();
         if (index_doctype_string.endsWith("/"))
@@ -178,14 +177,40 @@ $(document).ready(function(){
         var chunk_size = parseInt($("#chunk-size").val().trim());
         var posted_object_arr = [];
         var delimiter=$("#delimiter").val().trim();
-        
+        var url_parts_obj = get_url_parts($("#elastic-connect").val().trim());
+        // {"index":index, "doctype":doctype, "scheme_with_slashes":scheme_with_slashes, "username":username, "password":password, "domain":domain}; 
+        var index_name = url_parts_obj.index;
+        var doctype = url_parts_obj.doctype;
+        var scheme_with_slashes = url_parts_obj.scheme_with_slashes;
+        var username = url_parts_obj.username;
+        var password = url_parts_obj.password;
+        var domain_with_port = url_parts_obj.domain;
+
+        var url = scheme_with_slashes+domain_with_port+"/_bulk";
+
         Papa.parse(file_obj, {
                 header:true,
                 delimeter: delimiter,
                 chunkSize:1024*chunk_size,
                 skipEmptyLines:true,
                 chunk:function(results,parser){
-                    console.log(results) ;               
+                    var post_arr = [];
+                    console.log(results);
+                    for(i=0;i<results.data.length;i++)
+                    {
+                        var conf_onj = { "index" : { "_index" : index_name, "_type" : doctype } };
+                        post_arr.push(conf_onj);
+                        post_arr.push(results.data[i]);
+                    }
+                    
+                    
+                    console.log(post_arr);
+                    $.ajax({
+                        url:url,
+                        data:results,
+                        type : "POST",
+                        crossDomain : true
+                    });              
                 }
 
             });
