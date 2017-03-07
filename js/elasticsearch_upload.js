@@ -201,16 +201,19 @@ $(document).ready(function(){
                         post_arr.push(JSON.stringify(conf_onj));
                         post_arr.push(JSON.stringify(results.data[i]));
                     }
-                    
+                    console.log(post_arr.join("\n"));
                     $.ajax({
                         url:url,
-                        data:post_arr.join("\n"),
+                        data:post_arr.join("\n")+"\n", //append "\n" in last
                         type : "POST",
                         crossDomain : true,
                         dataType: "text",
                         error: function(e) {
                             console.log(e);
                         },
+                        success:function(response){
+                            console.log(response);
+                        }
                     });              
                 }
 
