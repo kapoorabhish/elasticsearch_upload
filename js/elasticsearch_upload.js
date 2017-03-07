@@ -225,8 +225,9 @@ $(document).ready(function(){
 
     function closeUpload()
     {
-        ajax_reference.abort();
         abort_parse = true;
+        ajax_reference.abort();
+        
 
         dialog
             .dialog( "option", "buttons", dialogButtons )
@@ -284,7 +285,6 @@ $(document).ready(function(){
                         dataType: "text",
                         error: function(e) {
                             console.log(e);
-                            abort_parse=true
                         },
                         success:function(response){
                             post_cycle += 1;
@@ -298,14 +298,16 @@ $(document).ready(function(){
                             }
                             progressbar.progressbar( "value", percent_done);
 
-                            // console.log(percent_done);
 
                         }
                     });
-                    $(document).on("click",".ui-dialog-buttonset",function(event){
-                        parser.abort();
-                    });
-                    console.log(x);
+                    
+
+                    
+                    if (abort_parse===true){
+                        parser.abort();    
+                    }
+
                     
                 }
 
