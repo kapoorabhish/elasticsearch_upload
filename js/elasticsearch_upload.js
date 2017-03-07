@@ -226,6 +226,29 @@ $(document).ready(function(){
                             {
                                 percent_done = Math.floor((post_cycle/num_cycles)*100);
                             }
+                              $( function() {
+                                    var progressbar = $( "#progressbar" ),
+                                        progressLabel = $( ".progress-label" );
+                                 
+                                    progressbar.progressbar({
+                                        value: false,
+                                        change: function() {
+                                            progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+                                        },
+                                        complete: function() {
+                                            progressLabel.text( "Complete!" );
+                                        }
+                                        });
+                                 
+                                    function progress() {
+                                      // https://jqueryui.com/progressbar/#label
+                                 
+                                      progressbar.progressbar( "value", percent_done );
+                                 
+                                      
+                                    }
+                                 
+                                  });
                             console.log(percent_done);
 
                         }
