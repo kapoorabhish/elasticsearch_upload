@@ -6,7 +6,8 @@ $(document).ready(function(){
     
     var rowCount = 0;           //global variable to be used further
     var file_obj = "";         //global variable to be used further
-
+    var ajax_reference = null;
+    var abort_parse = false;
     function handleFileSelect(evt){
         // var rowCount = 0;
         var file = evt.target.files[0];
@@ -173,7 +174,74 @@ $(document).ready(function(){
     })
 
 
+    
+    var progressbar = $( "#progressbar" ),
+          progressLabel = $( ".progress-label" ),
+          dialogButtons = [{
+            text: "Cancel Upload",
+            click: closeUpload
+          }],
+          dialog = $( "#dialog" ).dialog({
+            autoOpen: false,
+            closeOnEscape: false,
+            resizable: false,
+            buttons: dialogButtons,
+            open: function() {
+                progress();
+            },
+            beforeClose: function() {
+              $("#upload").button( "option", {
+                disabled: false,
+                label: "Upload"
+              });
+            }
+          })
+
+
     $("#upload").on("click",function(event){
+        $( this ).button( "option", {
+                    disabled: true,
+                    label: "Uploading..."
+                  });
+        dialog.dialog( "open" );
+        
+    });
+
+    progressbar.progressbar(
+        {
+            value: false,
+            change: function() {
+                progressLabel.text( "Upload Progress: " + progressbar.progressbar( "value" ) + "%" );
+            },
+            complete: function() {
+                progressLabel.text( "Complete!" );
+                dialog.dialog( "option", "buttons", [{
+                    text: "Close",
+                    click: closeUpload
+                }]);
+            $(".ui-dialog button").last().trigger( "focus" );
+          }
+                        });
+
+    function closeUpload()
+    {
+        ajax_reference.abort();
+        abort_parse = true;
+
+        dialog
+            .dialog( "option", "buttons", dialogButtons )
+            .dialog( "close" );
+            progressbar.progressbar( "value", false );
+            progressLabel
+            .text( "Starting upload..." );
+            $("#upload").trigger( "focus" );
+        
+
+    }
+
+    var x = 0;
+    function progress()
+    {
         var chunk_size = parseInt($("#chunk-size").val().trim());
         var posted_object_arr = [];
         var delimiter=$("#delimiter").val().trim();
@@ -201,13 +269,14 @@ $(document).ready(function(){
                 dynamicTyping: true,
                 chunk:function(results,parser){
                     var post_arr = [];
+                    x+=results.data.length;
                     for(i=0;i<results.data.length;i++)
                     {
                         var conf_onj = { "index" : { "_index" : index_name, "_type" : doctype } };
                         post_arr.push(JSON.stringify(conf_onj));
                         post_arr.push(JSON.stringify(results.data[i]));
                     }
-                    $.ajax({
+                    ajax_reference = $.ajax({
                         url:url,
                         data:post_arr.join("\n")+"\n", //append "\n" in last
                         type : "POST",
@@ -215,10 +284,11 @@ $(document).ready(function(){
                         dataType: "text",
                         error: function(e) {
                             console.log(e);
+                            abort_parse=true
                         },
                         success:function(response){
                             post_cycle += 1;
-                            if(post_cycle == num_cycles)
+                            if(post_cycle >= num_cycles)
                             {
                                 percent_done = 100;
                             }
@@ -226,39 +296,20 @@ $(document).ready(function(){
                             {
                                 percent_done = Math.floor((post_cycle/num_cycles)*100);
                             }
-                              $( function() {
-                                    var progressbar = $( "#progressbar" ),
-                                        progressLabel = $( ".progress-label" );
-                                 
-                                    progressbar.progressbar({
-                                        value: false,
-                                        change: function() {
-                                            progressLabel.text( progressbar.progressbar( "value" ) + "%" );
-                                        },
-                                        complete: function() {
-                                            progressLabel.text( "Complete!" );
-                                        }
-                                        });
-                                 
-                                    function progress() {
-                                      // https://jqueryui.com/progressbar/#label
-                                 
-                                      progressbar.progressbar( "value", percent_done );
-                                 
-                                      
-                                    }
-                                 
-                                  });
-                            console.log(percent_done);
+                            progressbar.progressbar( "value", percent_done);
+
+                            // console.log(percent_done);
 
                         }
-                    });              
+                    });
+                    $(document).on("click",".ui-dialog-buttonset",function(event){
+                        parser.abort();
+                    });
+                    console.log(x);
+                    
                 }
 
             });
-        
-    });
-
-
+    }
 
 });

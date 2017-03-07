@@ -7,22 +7,26 @@
         <script type="text/javascript" src="js/PapaParse-4.1.2/papaparse.js"></script>
         <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="css/custom.css">
+        <link rel="stylesheet" href="css/jquery-ui.css">
         <link href="bootstrap-fileinput/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css" />
         <script src="bootstrap-fileinput/js/fileinput.min.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
         <link href="bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
         <script src="bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
         <script src="js/LineReader.js"></script>
+        
         <style>
-            .ui-progressbar {
-                position: relative;
+            #progressbar {
+                margin-top: 20px;
             }
+             
             .progress-label {
-                position: absolute;
-                left: 50%;
-                top: 4px;
                 font-weight: bold;
                 text-shadow: 1px 1px 0 #fff;
+            }
+             
+            .ui-dialog-titlebar-close {
+                display: none;
             }
         </style>
     </head>
@@ -80,17 +84,21 @@
                         </table>
                     </div>
                 </div>  
-                <button style="margin-right:auto;margin-left:auto;" id="upload" type="submit" class="btn btn-info" data-toggle="modal" data-target="#progress-modal" data-backdrop="static" data-keyboard="false" >Start Uploading.</button>
+                <button style="margin-right:auto;margin-left:auto;" id="upload" type="submit" class="btn btn-info" >Start Uploading.</button>
             </div>
         </div>
 
-        <div id="progress-modal" class="modal fade" aria-hidden="true" role="dialog" tabindex="-1">
+        <!-- <div id="progress-modal" class="modal fade" aria-hidden="true" role="dialog" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div id="progressbar"></div>
+                    <div id="progressbar"><div class="progress-label">Loading...</div></div>
                     hello
                 </div>
             </div>
+        </div> -->
+        <div id="dialog" title="File Upload">
+            <div class="progress-label">Starting upload...</div>
+            <div id="progressbar"></div>
         </div>
 
         <script type="text/javascript" src="js/elasticsearch_upload.js"></script>
