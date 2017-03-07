@@ -178,21 +178,27 @@ $(document).ready(function(){
         var posted_object_arr = [];
         var delimiter=$("#delimiter").val().trim();
         var url_parts_obj = get_url_parts($("#elastic-connect").val().trim());
-        // {"index":index, "doctype":doctype, "scheme_with_slashes":scheme_with_slashes, "username":username, "password":password, "domain":domain}; 
         var index_name = url_parts_obj.index;
         var doctype = url_parts_obj.doctype;
         var scheme_with_slashes = url_parts_obj.scheme_with_slashes;
         var username = url_parts_obj.username;
         var password = url_parts_obj.password;
         var domain_with_port = url_parts_obj.domain;
-
         var url = scheme_with_slashes+domain_with_port+"/"+index_name+"/_bulk";
+        var post_cycle = 0;
+        var num_cycles = 1;
+        var percent_done = 0;
+        if (file_obj.size>(1024*chunk_size))
+        {
+            num_cycles = Math.ceil(file_obj.size/(1024*chunk_size));
+        }
 
         Papa.parse(file_obj, {
                 header:true,
                 delimeter: delimiter,
                 chunkSize:1024*chunk_size,
                 skipEmptyLines:true,
+                dynamicTyping: true,
                 chunk:function(results,parser){
                     var post_arr = [];
                     for(i=0;i<results.data.length;i++)
@@ -201,7 +207,6 @@ $(document).ready(function(){
                         post_arr.push(JSON.stringify(conf_onj));
                         post_arr.push(JSON.stringify(results.data[i]));
                     }
-                    console.log(post_arr.join("\n"));
                     $.ajax({
                         url:url,
                         data:post_arr.join("\n")+"\n", //append "\n" in last
@@ -212,7 +217,17 @@ $(document).ready(function(){
                             console.log(e);
                         },
                         success:function(response){
-                            console.log(response);
+                            post_cycle += 1;
+                            if(post_cycle == num_cycles)
+                            {
+                                percent_done = 100;
+                            }
+                            else
+                            {
+                                percent_done = Math.floor((post_cycle/num_cycles)*100);
+                            }
+                            console.log(percent_done);
+
                         }
                     });              
                 }
