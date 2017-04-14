@@ -8,6 +8,7 @@ $(document).ready(function(){
     var file_obj = "";         //global variable to be used further
     var ajax_reference = null;
     var abort_parse = false;
+    var parser_obj = null;
     function handleFileSelect(evt){
         // var rowCount = 0;
         var file = evt.target.files[0];
@@ -186,6 +187,7 @@ $(document).ready(function(){
             closeOnEscape: false,
             resizable: false,
             buttons: dialogButtons,
+            modal: true,
             open: function() {
                 progress();
             },
@@ -201,6 +203,7 @@ $(document).ready(function(){
     $("#upload").on("click",function(event){
         $( this ).button( "option", {
                     disabled: true,
+                    modal: true,
                     label: "Uploading..."
                   });
         dialog.dialog( "open" );
@@ -227,8 +230,6 @@ $(document).ready(function(){
     {
         abort_parse = true;
         ajax_reference.abort();
-        
-
         dialog
             .dialog( "option", "buttons", dialogButtons )
             .dialog( "close" );
@@ -269,6 +270,7 @@ $(document).ready(function(){
                 skipEmptyLines:true,
                 dynamicTyping: true,
                 chunk:function(results,parser){
+                    parser_obj = parser;
                     var post_arr = [];
                     x+=results.data.length;
                     for(i=0;i<results.data.length;i++)
@@ -277,16 +279,20 @@ $(document).ready(function(){
                         post_arr.push(JSON.stringify(conf_onj));
                         post_arr.push(JSON.stringify(results.data[i]));
                     }
+
                     ajax_reference = $.ajax({
                         url:url,
                         data:post_arr.join("\n")+"\n", //append "\n" in last
                         type : "POST",
                         crossDomain : true,
                         dataType: "text",
+                        async: false,
                         error: function(e) {
                             console.log(e);
                         },
                         success:function(response){
+                            console.log("helo");
+                            console.log(abort_parse);
                             post_cycle += 1;
                             if(post_cycle >= num_cycles)
                             {
@@ -301,11 +307,10 @@ $(document).ready(function(){
 
                         }
                     });
-                    
-
-                    
+                
                     if (abort_parse===true){
-                        parser.abort();    
+                        parser.abort();
+                        abort_parse=false;
                     }
 
                     
